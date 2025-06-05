@@ -24,8 +24,21 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+  data:
+    redis:
+      host: localhost
+      port: 6385
 
 logging:
   level:
     root: INFO
     org.springframework: DEBUG
+
+kafka:
+  bootstrap-servers: localhost:9092
+  consumer-group-id: forum-group
+  session-timeout-ms: 10000
+  max-partition-fetch-bytes: 1048576
+  max-poll-records: 500
+  max-poll-interval-ms: 300000
+  course-group: course-group-opened-topic

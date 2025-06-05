@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: db/changelog/changeset/V027_create_forum_schema.sql
+  - include:
+      file: db/changelog/changeset/V028_create_forum_table.sql
