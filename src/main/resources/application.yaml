@@ -42,3 +42,6 @@ kafka:
   max-poll-records: 500
   max-poll-interval-ms: 300000
   course-group: course-group-opened-topic
+  course-forum-group: course-forum-group-created-topic
+  producer:
+    enable: true

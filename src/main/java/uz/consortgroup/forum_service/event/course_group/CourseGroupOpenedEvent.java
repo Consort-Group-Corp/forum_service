@@ -1,4 +1,4 @@
-package uz.consortgroup.forum_service.event.coursegroup;
+package uz.consortgroup.forum_service.event.course_group;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

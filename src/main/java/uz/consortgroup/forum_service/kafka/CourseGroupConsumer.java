@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
-import uz.consortgroup.forum_service.event.coursegroup.CourseGroupOpenedEvent;
+import uz.consortgroup.forum_service.event.course_group.CourseGroupOpenedEvent;
 import uz.consortgroup.forum_service.service.processor.CourseGroupOpenedEventProcessor;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package uz.consortgroup.forum_service.service.processor;
 
 import org.springframework.stereotype.Service;
-import uz.consortgroup.forum_service.event.coursegroup.CourseGroupOpenedEvent;
+import uz.consortgroup.forum_service.event.course_group.CourseGroupOpenedEvent;
 import uz.consortgroup.forum_service.service.service.ForumService;
 
 import java.util.List;
