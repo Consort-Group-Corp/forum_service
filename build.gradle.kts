@@ -20,13 +20,34 @@ configurations {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom ("org.springframework.cloud:spring-cloud-dependencies:2024.0.1")
+    }
+}
+
 dependencies {
+    // Feign
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("io.github.openfeign.form:feign-form-spring:3.8.0")
+
+    // core-api-dto
+    implementation("uz.consortgroup:core-api-dto:0.0.1")
+
     // MapStruct
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
+
+    implementation("org.springframework.boot:spring-boot-starter-security")
+
+    //JWT
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
@@ -38,7 +59,6 @@ dependencies {
 
     implementation("jakarta.validation:jakarta.validation-api:3.0.2")
     implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final")
-
 
     // Redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
