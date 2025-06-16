@@ -6,6 +6,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ public abstract class AbstractProducer {
 
     protected void sendEventToTopic(String topic, List<Object> messages) {
         messages.forEach(message -> {
+            Objects.requireNonNull(message, "Message cannot be null");
             try {
                 log.info("Sending message to Kafka topic '{}' : {}", topic, message);
                 kafkaTemplate.send(topic, message);

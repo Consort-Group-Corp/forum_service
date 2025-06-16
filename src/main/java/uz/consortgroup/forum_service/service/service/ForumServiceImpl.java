@@ -31,6 +31,7 @@ public class ForumServiceImpl implements ForumService {
         if (events.isEmpty()) return;
 
         List<Forum> forums = events.stream()
+                .filter(Objects::nonNull)
                 .filter(event -> markIfNotProcessed(event.getMessageId()))
                 .map(this::mapToForum)
                 .filter(Objects::nonNull)

@@ -19,5 +19,5 @@ public class JwtUserDetails implements UserDetails {
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
     @Override public boolean isEnabled() { return true; }
-    @Override public String getPassword() { return null; } // токен — не по паролю
+    @Override public String getPassword() { return null; }
 }
