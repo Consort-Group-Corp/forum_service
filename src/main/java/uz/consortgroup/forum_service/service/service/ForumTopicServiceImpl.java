@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.consortgroup.core.api.v1.dto.forum.CreateForumTopicRequest;
 import uz.consortgroup.core.api.v1.dto.forum.ForumTopicResponse;
-import uz.consortgroup.forum_service.asspect.annotation.AllAspect;
 import uz.consortgroup.forum_service.checker.ForumAccessChecker;
 import uz.consortgroup.forum_service.entity.ForumTopic;
 import uz.consortgroup.forum_service.mapper.ForumTopicMapper;
@@ -26,13 +25,14 @@ public class ForumTopicServiceImpl implements ForumTopicService {
     private final ForumAccessChecker forumAccessChecker;
 
     @Override
-    @AllAspect
     @Transactional
     public ForumTopicResponse createForumTopic(CreateForumTopicRequest request) {
         JwtUserDetails userDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UUID authorId = userDetails.getId();
-        log.info("Author id: {}", authorId);
-        log.info("Incoming forumId in CreateForumTopicRequest: {}", request.getForumId());
+
+        log.info("Creating new forum topic by authorId={}", authorId);
+        log.info("Received forumId={} from CreateForumTopicRequest", request.getForumId());
+
         forumAccessChecker.checkAccessOrThrow(authorId, request.getForumId());
 
         ForumTopic forumTopic = ForumTopic.builder()
@@ -43,15 +43,19 @@ public class ForumTopicServiceImpl implements ForumTopicService {
                 .build();
 
         forumTopicRepository.save(forumTopic);
+        log.info("Forum topic created successfully with id={}", forumTopic.getId());
 
         return forumTopicMapper.toDto(forumTopic);
     }
 
     @Override
-    @AllAspect
     @Transactional(readOnly = true)
     public ForumTopic findForumTopicById(UUID topicId) {
+        log.debug("Fetching forum topic by id={}", topicId);
         return forumTopicRepository.findById(topicId)
-                .orElseThrow(() -> new EntityNotFoundException("Forum topic not found"));
+                .orElseThrow(() -> {
+                    log.warn("Forum topic with id={} not found", topicId);
+                    return new EntityNotFoundException("Forum topic not found");
+                });
     }
 }
