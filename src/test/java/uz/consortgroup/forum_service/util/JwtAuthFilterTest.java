@@ -39,7 +39,7 @@ class JwtAuthFilterTest {
     private FilterChain filterChain;
 
     @InjectMocks
-    private JwtAuthFilter jwtAuthFilter;
+    private AuthTokenFilter authTokenFilter;
 
     @Test
     void doFilterInternal_ValidToken() throws ServletException, IOException {
@@ -50,11 +50,9 @@ class JwtAuthFilterTest {
         UUID userId = UUID.randomUUID();
         String username = "testuser";
 
-        when(jwtUtils.validateJwtToken("valid.token.here")).thenReturn(true);
-        when(jwtUtils.getUserIdFromJwt("valid.token.here")).thenReturn(userId);
-        when(jwtUtils.getUsernameFromJwt("valid.token.here")).thenReturn(username);
+        when(jwtUtils.validateToken("valid.token.here")).thenReturn(true);
 
-        jwtAuthFilter.doFilterInternal(request, response, filterChain);
+        authTokenFilter.doFilterInternal(request, response, filterChain);
 
         assertNotNull(SecurityContextHolder.getContext().getAuthentication());
         assertEquals(username, ((JwtUserDetails) SecurityContextHolder.getContext()
@@ -68,9 +66,9 @@ class JwtAuthFilterTest {
         request.addHeader("Authorization", "Bearer invalid.token");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        when(jwtUtils.validateJwtToken("invalid.token")).thenReturn(false);
+        when(jwtUtils.validateToken("valid.token.here")).thenReturn(true);
 
-        jwtAuthFilter.doFilterInternal(request, response, filterChain);
+        authTokenFilter.doFilterInternal(request, response, filterChain);
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verify(filterChain).doFilter(request, response);
@@ -82,7 +80,7 @@ class JwtAuthFilterTest {
         request.addHeader("Authorization", "InvalidHeader");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        jwtAuthFilter.doFilterInternal(request, response, filterChain);
+        authTokenFilter.doFilterInternal(request, response, filterChain);
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verify(filterChain).doFilter(request, response);
@@ -94,7 +92,7 @@ class JwtAuthFilterTest {
         request.addHeader("Authorization", "Bearer ");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        jwtAuthFilter.doFilterInternal(request, response, filterChain);
+        authTokenFilter.doFilterInternal(request, response, filterChain);
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verify(filterChain).doFilter(request, response);

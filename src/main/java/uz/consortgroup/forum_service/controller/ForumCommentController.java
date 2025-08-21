@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,8 @@ import uz.consortgroup.core.api.v1.dto.forum.CreateForumCommentRequest;
 import uz.consortgroup.core.api.v1.dto.forum.ForumCommentResponse;
 import uz.consortgroup.forum_service.service.service.ForumCommentService;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/forum/forum-comment")
 @RequiredArgsConstructor
@@ -21,8 +24,9 @@ public class ForumCommentController {
     private final ForumCommentService forumCommentService;
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping
-    public ForumCommentResponse createComment(@Valid @RequestBody CreateForumCommentRequest request) {
-        return forumCommentService.createComment(request);
+    @PostMapping("/{topicId}/comments")
+    public ForumCommentResponse createComment(@PathVariable UUID topicId,
+                                              @Valid @RequestBody CreateForumCommentRequest request) {
+        return forumCommentService.createComment(topicId, request);
     }
 }

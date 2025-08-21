@@ -57,20 +57,20 @@ class ForumTopicServiceImplTest {
         String title = "Test Title";
         String content = "Test Content";
 
-        CreateForumTopicRequest request = new CreateForumTopicRequest(forumId, title, content);
+        CreateForumTopicRequest request = new CreateForumTopicRequest();
         ForumTopic forumTopic = ForumTopic.builder()
-                .forumId(forumId)
                 .authorId(userId)
                 .title(title)
                 .content(content)
                 .build();
+
         ForumTopicResponse expectedResponse = new ForumTopicResponse();
 
         mockSecurityContext(userId);
         when(forumTopicRepository.save(any(ForumTopic.class))).thenReturn(forumTopic);
         when(forumTopicMapper.toDto(forumTopic)).thenReturn(expectedResponse);
 
-        ForumTopicResponse result = forumTopicService.createForumTopic(request);
+        ForumTopicResponse result = forumTopicService.createForumTopic(forumId, request);
 
         assertNotNull(result);
         assertEquals(expectedResponse, result);
@@ -82,12 +82,12 @@ class ForumTopicServiceImplTest {
     void createForumTopic_AccessDenied() {
         UUID userId = UUID.randomUUID();
         UUID forumId = UUID.randomUUID();
-        CreateForumTopicRequest request = new CreateForumTopicRequest(forumId, "Title", "Content");
+        CreateForumTopicRequest request = new CreateForumTopicRequest();
 
         mockSecurityContext(userId);
         doThrow(new SecurityException("Access denied")).when(forumAccessChecker).checkAccessOrThrow(userId, forumId);
 
-        assertThrows(SecurityException.class, () -> forumTopicService.createForumTopic(request));
+        assertThrows(SecurityException.class, () -> forumTopicService.createForumTopic(forumId, request));
     }
 
 

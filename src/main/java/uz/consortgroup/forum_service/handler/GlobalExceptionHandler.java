@@ -9,7 +9,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import uz.consortgroup.forum_service.exception.AccessDeniedException;
+import uz.consortgroup.forum_service.exception.ForumNotFoundException;
 import uz.consortgroup.forum_service.exception.ForumTopicNotFoundException;
+import uz.consortgroup.forum_service.exception.UnauthorizedException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +20,6 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-    // General Exception Handlers
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         log.error("Unexpected exception: ", ex);
@@ -58,9 +60,31 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Validation failed", ex.getMessage()));
     }
 
+    @ExceptionHandler(ForumNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleForumNotFoundException(ForumNotFoundException ex) {
+        log.error("Forum not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Forum not found", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        log.error("Access denied: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Access denied", ex.getMessage()));
+    }
+
     @ExceptionHandler(ForumTopicNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleForumTopicNotFoundException(ForumTopicNotFoundException ex) {
+        log.error("Topic not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Topic not found", ex.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex) {
+        log.error("Unauthorized: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), "Unauthorized", ex.getMessage()));
     }
 }

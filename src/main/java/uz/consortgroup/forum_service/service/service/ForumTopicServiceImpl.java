@@ -9,10 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import uz.consortgroup.core.api.v1.dto.forum.CreateForumTopicRequest;
 import uz.consortgroup.core.api.v1.dto.forum.ForumTopicResponse;
 import uz.consortgroup.forum_service.checker.ForumAccessChecker;
+import uz.consortgroup.forum_service.entity.Forum;
 import uz.consortgroup.forum_service.entity.ForumTopic;
 import uz.consortgroup.forum_service.mapper.ForumTopicMapper;
 import uz.consortgroup.forum_service.repository.ForumTopicRepository;
-import uz.consortgroup.forum_service.security.JwtUserDetails;
+import uz.consortgroup.forum_service.security.AuthenticatedUser;
 
 import java.util.UUID;
 
@@ -22,30 +23,35 @@ import java.util.UUID;
 public class ForumTopicServiceImpl implements ForumTopicService {
     private final ForumTopicRepository forumTopicRepository;
     private final ForumTopicMapper forumTopicMapper;
+    private final ForumService forumService;
     private final ForumAccessChecker forumAccessChecker;
 
     @Override
     @Transactional
-    public ForumTopicResponse createForumTopic(CreateForumTopicRequest request) {
-        JwtUserDetails userDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UUID authorId = userDetails.getId();
+    public ForumTopicResponse createForumTopic(UUID forumId, CreateForumTopicRequest request) {
+        AuthenticatedUser user = (AuthenticatedUser) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
 
-        log.info("Creating new forum topic by authorId={}", authorId);
-        log.info("Received forumId={} from CreateForumTopicRequest", request.getForumId());
+        UUID authorId = user.getUserId();
 
-        forumAccessChecker.checkAccessOrThrow(authorId, request.getForumId());
+        log.info("Creating new forum topic. forumId={}, authorId={}", forumId, authorId);
 
-        ForumTopic forumTopic = ForumTopic.builder()
-                .forumId(request.getForumId())
+        Forum forum  = forumService.findForumById(forumId);
+        UUID groupId = forum.getGroupId();
+
+        forumAccessChecker.checkAccessOrThrow(authorId, groupId);
+
+        ForumTopic topic = ForumTopic.builder()
+                .forum(forum)
                 .authorId(authorId)
                 .title(request.getTitle())
                 .content(request.getContent())
                 .build();
 
-        forumTopicRepository.save(forumTopic);
-        log.info("Forum topic created successfully with id={}", forumTopic.getId());
+        forumTopicRepository.save(topic);
+        log.info("Forum topic created. topicId={}, forumId={}", topic.getId(), forumId);
 
-        return forumTopicMapper.toDto(forumTopic);
+        return forumTopicMapper.toDto(topic);
     }
 
     @Override

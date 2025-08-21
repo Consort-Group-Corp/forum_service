@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import uz.consortgroup.core.api.v1.dto.forum.CreateForumTopicRequest;
 import uz.consortgroup.core.api.v1.dto.forum.ForumTopicResponse;
 import uz.consortgroup.forum_service.service.service.ForumTopicService;
-import uz.consortgroup.forum_service.util.JwtAuthFilter;
+import uz.consortgroup.forum_service.util.AuthTokenFilter;
 import uz.consortgroup.forum_service.util.JwtUtils;
 
 import java.time.Instant;
@@ -37,7 +37,7 @@ class ForumTopicControllerTest {
     private JwtUtils jwtUtils;
 
     @MockitoBean
-    private JwtAuthFilter jwtAuthFilter;
+    private AuthTokenFilter authTokenFilter;
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -51,7 +51,7 @@ class ForumTopicControllerTest {
                 .createdAt(Instant.now())
                 .build();
 
-        when(forumTopicService.createForumTopic(any(CreateForumTopicRequest.class))).thenReturn(response);
+        when(forumTopicService.createForumTopic(UUID.randomUUID(), any(CreateForumTopicRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/forum/forum-topic")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +93,7 @@ class ForumTopicControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void createForumTopic_ServiceError_ReturnsInternalServerError() throws Exception {
-        when(forumTopicService.createForumTopic(any(CreateForumTopicRequest.class)))
+        when(forumTopicService.createForumTopic(UUID.randomUUID(), any(CreateForumTopicRequest.class)))
                 .thenThrow(new RuntimeException("Service error"));
 
         mockMvc.perform(post("/api/v1/forum/forum-topic")

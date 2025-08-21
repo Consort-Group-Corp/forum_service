@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import uz.consortgroup.core.api.v1.dto.forum.CreateForumCommentRequest;
 import uz.consortgroup.core.api.v1.dto.forum.ForumCommentResponse;
 import uz.consortgroup.forum_service.service.service.ForumCommentService;
-import uz.consortgroup.forum_service.util.JwtAuthFilter;
+import uz.consortgroup.forum_service.util.AuthTokenFilter;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = ForumCommentController.class,
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
-                classes = JwtAuthFilter.class))
+                classes = AuthTokenFilter.class))
 class ForumCommentControllerTest {
 
     @Autowired
@@ -51,11 +51,10 @@ class ForumCommentControllerTest {
                 .createdAt(Instant.now())
                 .build();
 
-        when(forumCommentService.createComment(any(CreateForumCommentRequest.class)))
+        when(forumCommentService.createComment(UUID.randomUUID(), any(CreateForumCommentRequest.class)))
                 .thenReturn(response);
 
         CreateForumCommentRequest request = new CreateForumCommentRequest();
-        request.setTopicId(UUID.randomUUID());
         request.setContent("Test content");
 
         mockMvc.perform(post("/api/v1/forum/forum-comment")
@@ -71,7 +70,6 @@ class ForumCommentControllerTest {
     @WithMockUser
     void shouldReturnBadRequestWhenContentIsBlank() throws Exception {
         CreateForumCommentRequest request = new CreateForumCommentRequest();
-        request.setTopicId(UUID.randomUUID());
         request.setContent("");
 
         mockMvc.perform(post("/api/v1/forum/forum-comment")
@@ -85,7 +83,6 @@ class ForumCommentControllerTest {
     @WithMockUser
     void shouldReturnBadRequestWhenTopicIdIsNull() throws Exception {
         CreateForumCommentRequest request = new CreateForumCommentRequest();
-        request.setTopicId(null);
         request.setContent("Test content");
 
         mockMvc.perform(post("/api/v1/forum/forum-comment")
@@ -98,11 +95,10 @@ class ForumCommentControllerTest {
     @Test
     @WithMockUser
     void shouldHandleServiceException() throws Exception {
-        when(forumCommentService.createComment(any(CreateForumCommentRequest.class)))
+        when(forumCommentService.createComment(UUID.randomUUID(), any(CreateForumCommentRequest.class)))
                 .thenThrow(new RuntimeException("Service error"));
 
         CreateForumCommentRequest request = new CreateForumCommentRequest();
-        request.setTopicId(UUID.randomUUID());
         request.setContent("Test content");
 
         mockMvc.perform(post("/api/v1/forum/forum-comment")

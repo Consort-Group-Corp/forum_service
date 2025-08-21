@@ -58,9 +58,8 @@ class ForumCommentServiceImplTest {
         UUID forumId = UUID.randomUUID();
         String content = "Test content";
 
-        CreateForumCommentRequest request = new CreateForumCommentRequest(topicId, content);
+        CreateForumCommentRequest request = new CreateForumCommentRequest();
         ForumTopic topic = new ForumTopic();
-        topic.setForumId(forumId);
 
         ForumCommentResponse expectedResponse = new ForumCommentResponse();
 
@@ -83,7 +82,7 @@ class ForumCommentServiceImplTest {
                         comment.getContent().equals(content))))
                 .thenReturn(expectedResponse);
 
-        ForumCommentResponse result = forumCommentService.createComment(request);
+        ForumCommentResponse result = forumCommentService.createComment(topicId, request);
 
         assertNotNull(result);
         assertEquals(expectedResponse, result);
@@ -97,11 +96,11 @@ class ForumCommentServiceImplTest {
     @Test
     void createComment_TopicNotFound() {
         UUID topicId = UUID.randomUUID();
-        CreateForumCommentRequest request = new CreateForumCommentRequest(topicId, "content");
+        CreateForumCommentRequest request = new CreateForumCommentRequest();
 
         when(forumTopicService.findForumTopicById(topicId)).thenReturn(null);
 
-        assertThrows(RuntimeException.class, () -> forumCommentService.createComment(request));
+        assertThrows(RuntimeException.class, () -> forumCommentService.createComment(topicId, request));
     }
 
     @Test
@@ -109,9 +108,8 @@ class ForumCommentServiceImplTest {
         UUID userId = UUID.randomUUID();
         UUID topicId = UUID.randomUUID();
         UUID forumId = UUID.randomUUID();
-        CreateForumCommentRequest request = new CreateForumCommentRequest(topicId, "content");
+        CreateForumCommentRequest request = new CreateForumCommentRequest();
         ForumTopic topic = new ForumTopic();
-        topic.setForumId(forumId);
 
         JwtUserDetails userDetails = mock(JwtUserDetails.class);
         when(userDetails.getId()).thenReturn(userId);
@@ -122,6 +120,6 @@ class ForumCommentServiceImplTest {
         when(forumTopicService.findForumTopicById(topicId)).thenReturn(topic);
         doThrow(new SecurityException("Access denied")).when(forumAccessChecker).checkAccessOrThrow(userId, forumId);
 
-        assertThrows(SecurityException.class, () -> forumCommentService.createComment(request));
+        assertThrows(SecurityException.class, () -> forumCommentService.createComment(topicId, request));
     }
 }

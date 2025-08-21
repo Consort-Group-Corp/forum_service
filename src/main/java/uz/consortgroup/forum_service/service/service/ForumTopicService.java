@@ -7,6 +7,6 @@ import uz.consortgroup.forum_service.entity.ForumTopic;
 import java.util.UUID;
 
 public interface ForumTopicService {
-    ForumTopicResponse createForumTopic(CreateForumTopicRequest request);
+    ForumTopicResponse createForumTopic(UUID forumId, CreateForumTopicRequest request);
     ForumTopic findForumTopicById(UUID topicId);
 }

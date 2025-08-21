@@ -10,7 +10,6 @@ import uz.consortgroup.forum_service.entity.ForumComment;
 public interface ForumCommentMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "topicId", source = "forumTopic.id")
-    @Mapping(target = "authorId", source = "authorId")
     @Mapping(target = "content", source = "content")
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "updatedAt", source = "updatedAt")

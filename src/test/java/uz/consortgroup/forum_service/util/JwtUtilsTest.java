@@ -34,48 +34,42 @@ class JwtUtilsTest {
 
     @Test
     void getUserIdFromJwt_Success() {
-        UUID userId = jwtUtils.getUserIdFromJwt(validToken);
+        UUID userId = jwtUtils.getUserIdFromToken(validToken);
         assertNotNull(userId);
     }
 
     @Test
     void getUserIdFromJwt_InvalidToken() {
         assertThrows(io.jsonwebtoken.JwtException.class, () -> {
-            jwtUtils.getUserIdFromJwt(invalidToken);
+            jwtUtils.getUserIdFromToken(invalidToken);
         });
-    }
-
-    @Test
-    void getUsernameFromJwt_Success() {
-        String username = jwtUtils.getUsernameFromJwt(validToken);
-        assertNotNull(username);
     }
 
     @Test
     void getUsernameFromJwt_InvalidToken() {
         assertThrows(io.jsonwebtoken.JwtException.class, () -> {
-            jwtUtils.getUsernameFromJwt(invalidToken);
+            jwtUtils.getUserIdFromToken(invalidToken);
         });
     }
 
     @Test
     void validateJwtToken_ValidToken() {
-        assertTrue(jwtUtils.validateJwtToken(validToken));
+        assertTrue(jwtUtils.validateToken(validToken));
     }
 
     @Test
     void validateJwtToken_InvalidToken() {
-        assertFalse(jwtUtils.validateJwtToken(invalidToken));
+        assertFalse(jwtUtils.validateToken(invalidToken));
     }
 
     @Test
     void validateJwtToken_NullToken() {
-        assertFalse(jwtUtils.validateJwtToken(null));
+        assertFalse(jwtUtils.validateToken(null));
     }
 
     @Test
     void validateJwtToken_EmptyToken() {
-        assertFalse(jwtUtils.validateJwtToken(""));
+        assertFalse(jwtUtils.validateToken(""));
     }
 
     private String generateValidToken() {

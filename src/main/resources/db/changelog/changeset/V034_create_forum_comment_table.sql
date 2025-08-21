@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS forum_schema.forum_comment (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    forum_id UUID REFERENCES forum_schema.forum(id) ON DELETE CASCADE,
     topic_id UUID NOT NULL REFERENCES forum_schema.forum_topic(id) ON DELETE CASCADE,
     author_id UUID NOT NULL,
     content TEXT NOT NULL,

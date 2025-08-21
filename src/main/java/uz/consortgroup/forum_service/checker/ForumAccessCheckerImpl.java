@@ -2,11 +2,11 @@ package uz.consortgroup.forum_service.checker;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
-import uz.consortgroup.core.api.v1.dto.forum.ForumAccessRequest;
+import uz.consortgroup.core.api.v1.dto.forum.ForumAccessByGroupRequest;
 import uz.consortgroup.core.api.v1.dto.forum.ForumAccessResponse;
-import uz.consortgroup.forum_service.client.ForumAccessFeignClient;
+import uz.consortgroup.forum_service.client.UserClient;
+import uz.consortgroup.forum_service.exception.AccessDeniedException;
 
 import java.util.UUID;
 
@@ -14,29 +14,23 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class ForumAccessCheckerImpl implements ForumAccessChecker {
-    private final ForumAccessFeignClient accessClient;
+    private final UserClient accessClient;
 
     @Override
     public void checkAccessOrThrow(UUID userId, UUID groupId) {
         log.debug("Checking access for userId={} to groupId={}", userId, groupId);
 
-        UUID courseId = accessClient.getCourseIdByGroupId(groupId);
-        if (courseId == null) {
-            log.warn("Access denied: no course found for groupId={}", groupId);
-            throw new AccessDeniedException("Course not found for group");
-        }
-
-        ForumAccessRequest request = ForumAccessRequest.builder()
+        ForumAccessByGroupRequest request = ForumAccessByGroupRequest.builder()
                 .userId(userId)
-                .courseId(courseId)
+                .groupId(groupId)
                 .build();
 
-        ForumAccessResponse response = accessClient.checkAccess(request);
+        ForumAccessResponse response = accessClient.checkAccessByGroup(request);
         if (!response.isHasAccess()) {
-            log.warn("Access denied: userId={} has no access to courseId={}", userId, courseId);
-            throw new AccessDeniedException("User does not have access to this forum");
+            log.warn("Access denied: userId={} groupId={} reason={}", userId, groupId, response.getReason());
+            throw new AccessDeniedException(String.format("Access denied: userId=%s groupId=%s reason=%s", userId, groupId, response.getReason()));
         }
 
-        log.debug("Access granted: userId={} has access to courseId={}", userId, courseId);
+        log.debug("Access granted: userId={} groupId={}", userId, groupId);
     }
 }
