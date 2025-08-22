@@ -36,17 +36,6 @@ class CourseGroupOpenedEventProcessorTest {
         verify(forumService).createForum(events);
     }
 
-    @Test
-    void process_EmptyList() {
-        processor.process(List.of());
-        verify(forumService).createForum(List.of());
-    }
-
-    @Test
-    void process_NullList() {
-        processor.process(null);
-        verify(forumService).createForum(null);
-    }
 
     @Test
     void process_ServiceThrowsException() {

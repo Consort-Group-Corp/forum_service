@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.consortgroup.forum_service.entity.Forum;
 import uz.consortgroup.forum_service.event.course_group.CourseGroupOpenedEvent;
+import uz.consortgroup.forum_service.exception.ForumNotFoundException;
 import uz.consortgroup.forum_service.repository.ForumRepository;
 import uz.consortgroup.forum_service.service.event.CourseForumGroupEventService;
 
@@ -59,12 +60,21 @@ public class ForumServiceImpl implements ForumService {
                 forums.getFirst().getCourseId(), forums.getFirst().getGroupId());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Forum findForumById(UUID forumId) {
+        log.info("Fetching forum by id={}", forumId);
+       return forumRepository.findById(forumId).orElseThrow(() -> new ForumNotFoundException(String.format("Forum with id %s not found", forumId)));
+    }
+
     private Forum mapToForum(CourseGroupOpenedEvent event) {
         log.debug("Mapping CourseGroupOpenedEvent to Forum entity. courseId={}, groupId={}",
                 event.getCourseId(), event.getGroupId());
 
         return Forum.builder()
                 .courseId(event.getCourseId())
+                .ownerId(event.getOwnerId())
+                .forumAccessType(event.getForumAccessType())
                 .groupId(event.getGroupId())
                 .title(event.getCourseTitle())
                 .startTime(event.getStartTime())

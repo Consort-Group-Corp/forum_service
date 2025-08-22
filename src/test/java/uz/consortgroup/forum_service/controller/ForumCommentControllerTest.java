@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import uz.consortgroup.core.api.v1.dto.forum.CreateForumCommentRequest;
 import uz.consortgroup.core.api.v1.dto.forum.ForumCommentResponse;
 import uz.consortgroup.forum_service.service.service.ForumCommentService;
-import uz.consortgroup.forum_service.util.JwtAuthFilter;
+import uz.consortgroup.forum_service.util.AuthTokenFilter;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = ForumCommentController.class,
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
-                classes = JwtAuthFilter.class))
+                classes = AuthTokenFilter.class))
 class ForumCommentControllerTest {
 
     @Autowired
@@ -40,25 +40,26 @@ class ForumCommentControllerTest {
     @MockitoBean
     private ForumCommentService forumCommentService;
 
+    private final UUID topicId = UUID.randomUUID();
+
     @Test
     @WithMockUser
     void shouldCreateCommentSuccessfully() throws Exception {
         ForumCommentResponse response = ForumCommentResponse.builder()
                 .id(UUID.randomUUID())
-                .topicId(UUID.randomUUID())
+                .topicId(topicId)
                 .authorId(UUID.randomUUID())
                 .content("Test content")
                 .createdAt(Instant.now())
                 .build();
 
-        when(forumCommentService.createComment(any(CreateForumCommentRequest.class)))
+        when(forumCommentService.createComment(any(UUID.class), any(CreateForumCommentRequest.class)))
                 .thenReturn(response);
 
         CreateForumCommentRequest request = new CreateForumCommentRequest();
-        request.setTopicId(UUID.randomUUID());
         request.setContent("Test content");
 
-        mockMvc.perform(post("/api/v1/forum/forum-comment")
+        mockMvc.perform(post("/api/v1/forum/forum-comment/{topicId}/comments", topicId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf()))
@@ -71,24 +72,9 @@ class ForumCommentControllerTest {
     @WithMockUser
     void shouldReturnBadRequestWhenContentIsBlank() throws Exception {
         CreateForumCommentRequest request = new CreateForumCommentRequest();
-        request.setTopicId(UUID.randomUUID());
         request.setContent("");
 
-        mockMvc.perform(post("/api/v1/forum/forum-comment")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .with(csrf()))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser
-    void shouldReturnBadRequestWhenTopicIdIsNull() throws Exception {
-        CreateForumCommentRequest request = new CreateForumCommentRequest();
-        request.setTopicId(null);
-        request.setContent("Test content");
-
-        mockMvc.perform(post("/api/v1/forum/forum-comment")
+        mockMvc.perform(post("/api/v1/forum/forum-comment/{topicId}/comments", topicId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf()))
@@ -98,14 +84,13 @@ class ForumCommentControllerTest {
     @Test
     @WithMockUser
     void shouldHandleServiceException() throws Exception {
-        when(forumCommentService.createComment(any(CreateForumCommentRequest.class)))
+        when(forumCommentService.createComment(any(UUID.class), any(CreateForumCommentRequest.class)))
                 .thenThrow(new RuntimeException("Service error"));
 
         CreateForumCommentRequest request = new CreateForumCommentRequest();
-        request.setTopicId(UUID.randomUUID());
         request.setContent("Test content");
 
-        mockMvc.perform(post("/api/v1/forum/forum-comment")
+        mockMvc.perform(post("/api/v1/forum/forum-comment/{topicId}/comments", topicId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf()))

@@ -8,10 +8,6 @@ import uz.consortgroup.forum_service.entity.ForumTopic;
 
 @Mapper(componentModel = "spring",  unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ForumTopicMapper {
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "title", source = "title")
-    @Mapping(target = "content", source = "content")
-    @Mapping(target = "authorId", source = "authorId")
-    @Mapping(target = "createdAt", source = "createdAt")
+    @Mapping(target = "forumId", source = "forum.id")
     ForumTopicResponse toDto(ForumTopic forumTopic);
 }

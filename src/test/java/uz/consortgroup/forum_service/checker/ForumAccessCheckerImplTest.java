@@ -5,19 +5,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
-import uz.consortgroup.core.api.v1.dto.forum.ForumAccessRequest;
+import uz.consortgroup.core.api.v1.dto.forum.ForumAccessByGroupRequest;
 import uz.consortgroup.core.api.v1.dto.forum.ForumAccessResponse;
-import uz.consortgroup.forum_service.client.ForumAccessFeignClient;
+import uz.consortgroup.core.api.v1.dto.forum.enumeration.ForumAccessReason;
+import uz.consortgroup.forum_service.client.UserClient;
+import uz.consortgroup.forum_service.exception.AccessDeniedException;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,66 +24,53 @@ import static org.mockito.Mockito.when;
 class ForumAccessCheckerImplTest {
 
     @Mock
-    private ForumAccessFeignClient accessClient;
+    private UserClient accessClient;
 
     @InjectMocks
     private ForumAccessCheckerImpl forumAccessChecker;
 
     private final UUID testUserId = UUID.randomUUID();
     private final UUID testGroupId = UUID.randomUUID();
-    private final UUID testCourseId = UUID.randomUUID();
 
     @Test
     void shouldAllowAccessWhenUserHasPermission() {
-        when(accessClient.getCourseIdByGroupId(testGroupId)).thenReturn(testCourseId);
         ForumAccessResponse response = new ForumAccessResponse();
         response.setHasAccess(true);
-        when(accessClient.checkAccess(any(ForumAccessRequest.class)))
+
+        when(accessClient.checkAccessByGroup(any(ForumAccessByGroupRequest.class)))
                 .thenReturn(response);
 
         assertDoesNotThrow(() -> forumAccessChecker.checkAccessOrThrow(testUserId, testGroupId));
 
-        verify(accessClient).getCourseIdByGroupId(testGroupId);
-        verify(accessClient).checkAccess(argThat(request ->
+        verify(accessClient).checkAccessByGroup(argThat(request ->
                 request.getUserId().equals(testUserId) &&
-                        request.getCourseId().equals(testCourseId)));
+                        request.getGroupId().equals(testGroupId)
+        ));
     }
 
     @Test
     void shouldDenyAccessWhenUserHasNoPermission() {
-        when(accessClient.getCourseIdByGroupId(testGroupId)).thenReturn(testCourseId);
-        when(accessClient.checkAccess(any(ForumAccessRequest.class)))
-                .thenReturn(new ForumAccessResponse());
+        ForumAccessResponse response = new ForumAccessResponse();
+        response.setHasAccess(false);
+        response.setReason(ForumAccessReason.FORUM_GROUP_NOT_FOUND);
+
+        when(accessClient.checkAccessByGroup(any(ForumAccessByGroupRequest.class)))
+                .thenReturn(response);
 
         assertThrows(AccessDeniedException.class,
                 () -> forumAccessChecker.checkAccessOrThrow(testUserId, testGroupId));
 
-        verify(accessClient).getCourseIdByGroupId(testGroupId);
-        verify(accessClient).checkAccess(any(ForumAccessRequest.class));
+        verify(accessClient).checkAccessByGroup(any(ForumAccessByGroupRequest.class));
     }
 
     @Test
-    void shouldThrowExceptionWhenCourseNotFound() {
-        when(accessClient.getCourseIdByGroupId(testGroupId)).thenReturn(null);
-
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
-                () -> forumAccessChecker.checkAccessOrThrow(testUserId, testGroupId));
-
-        assertEquals("Course not found for group", exception.getMessage());
-        verify(accessClient).getCourseIdByGroupId(testGroupId);
-        verify(accessClient, never()).checkAccess(any());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenFeignClientFails() {
-        when(accessClient.getCourseIdByGroupId(testGroupId)).thenReturn(testCourseId);
-        when(accessClient.checkAccess(any(ForumAccessRequest.class)))
+    void shouldPropagateExceptionWhenFeignClientFails() {
+        when(accessClient.checkAccessByGroup(any(ForumAccessByGroupRequest.class)))
                 .thenThrow(new RuntimeException("Service unavailable"));
 
         assertThrows(RuntimeException.class,
                 () -> forumAccessChecker.checkAccessOrThrow(testUserId, testGroupId));
 
-        verify(accessClient).getCourseIdByGroupId(testGroupId);
-        verify(accessClient).checkAccess(any(ForumAccessRequest.class));
+        verify(accessClient).checkAccessByGroup(any(ForumAccessByGroupRequest.class));
     }
 }

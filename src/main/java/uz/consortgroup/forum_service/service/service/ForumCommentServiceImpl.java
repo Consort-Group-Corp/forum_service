@@ -12,10 +12,14 @@ import uz.consortgroup.forum_service.entity.ForumComment;
 import uz.consortgroup.forum_service.entity.ForumTopic;
 import uz.consortgroup.forum_service.mapper.ForumCommentMapper;
 import uz.consortgroup.forum_service.repository.ForumCommentRepository;
-import uz.consortgroup.forum_service.security.JwtUserDetails;
+import uz.consortgroup.forum_service.repository.IdCount;
+import uz.consortgroup.forum_service.security.AuthenticatedUser;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,14 +33,16 @@ public class ForumCommentServiceImpl implements ForumCommentService {
 
     @Override
     @Transactional
-    public ForumCommentResponse createComment(CreateForumCommentRequest request) {
-        JwtUserDetails userDetails = (JwtUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UUID authorId = userDetails.getId();
+    public ForumCommentResponse createComment(UUID topicId, CreateForumCommentRequest request) {
+        AuthenticatedUser user = (AuthenticatedUser) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        UUID authorId = user.getUserId();
 
-        log.info("Creating comment for topicId={}, authorId={}", request.getTopicId(), authorId);
+        log.info("Creating comment for topicId={}, authorId={}", topicId, authorId);
 
-        ForumTopic topic = forumTopicService.findForumTopicById(request.getTopicId());
-        forumAccessChecker.checkAccessOrThrow(authorId, topic.getForumId());
+        ForumTopic topic = forumTopicService.findForumTopicById(topicId);
+        UUID groupId = topic.getForum().getGroupId();
+        forumAccessChecker.checkAccessOrThrow(authorId, groupId);
 
         ForumComment comment = ForumComment.builder()
                 .forumTopic(topic)
@@ -47,9 +53,18 @@ public class ForumCommentServiceImpl implements ForumCommentService {
 
         forumCommentRepository.save(comment);
 
-        log.info("Comment created successfully. CommentId={}, topicId={}, forumId={}",
-                comment.getId(), topic.getId(), topic.getForumId());
+        log.info("Comment created. commentId={}, topicId={}, forumId={}, groupId={}",
+                comment.getId(), topic.getId(), topic.getForum().getId(), groupId);
 
         return forumCommentMapper.toDto(comment);
+    }
+
+    @Override
+    public Map<UUID, Long> countByForumIds(List<UUID> forumIds) {
+        log.info("Counting comments by forumIds={}", forumIds);
+
+        if (forumIds.isEmpty()) return Map.of();
+        return forumCommentRepository.countCommentsByForumIds(forumIds).stream()
+                .collect(Collectors.toMap(IdCount::getId, IdCount::getCount));
     }
 }

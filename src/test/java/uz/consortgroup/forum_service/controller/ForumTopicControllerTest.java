@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import uz.consortgroup.core.api.v1.dto.forum.CreateForumTopicRequest;
 import uz.consortgroup.core.api.v1.dto.forum.ForumTopicResponse;
 import uz.consortgroup.forum_service.service.service.ForumTopicService;
-import uz.consortgroup.forum_service.util.JwtAuthFilter;
+import uz.consortgroup.forum_service.util.AuthTokenFilter;
 import uz.consortgroup.forum_service.util.JwtUtils;
 
 import java.time.Instant;
@@ -37,7 +37,9 @@ class ForumTopicControllerTest {
     private JwtUtils jwtUtils;
 
     @MockitoBean
-    private JwtAuthFilter jwtAuthFilter;
+    private AuthTokenFilter authTokenFilter;
+
+    private final UUID forumId = UUID.randomUUID();
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -51,54 +53,45 @@ class ForumTopicControllerTest {
                 .createdAt(Instant.now())
                 .build();
 
-        when(forumTopicService.createForumTopic(any(CreateForumTopicRequest.class))).thenReturn(response);
+        when(forumTopicService.createForumTopic(any(UUID.class), any(CreateForumTopicRequest.class)))
+                .thenReturn(response);
 
-        mockMvc.perform(post("/api/v1/forum/forum-topic")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"forumId\":\"" + UUID.randomUUID() + "\",\"title\":\"Test Topic\",\"content\":\"Test Content\"}"))
+        mockMvc.perform(post("/api/v1/forum/forum-topic/{forumId}/topics", forumId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Test Topic\",\"content\":\"Test Content\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(testId.toString()))
                 .andExpect(jsonPath("$.title").value("Test Topic"))
                 .andExpect(jsonPath("$.content").value("Test Content"));
     }
 
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void createForumTopic_MissingForumId_ReturnsBadRequest() throws Exception {
-        mockMvc.perform(post("/api/v1/forum/forum-topic")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"title\":\"Test Topic\",\"content\":\"Test Content\"}"))
-                .andExpect(status().isBadRequest());
-    }
-
     @Test
     @WithMockUser(roles = "ADMIN")
     void createForumTopic_EmptyTitle_ReturnsBadRequest() throws Exception {
-        mockMvc.perform(post("/api/v1/forum/forum-topic")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"forumId\":\"" + UUID.randomUUID() + "\",\"title\":\"\",\"content\":\"Test Content\"}"))
+        mockMvc.perform(post("/api/v1/forum/forum-topic/{forumId}/topics", forumId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"\",\"content\":\"Test Content\"}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void createForumTopic_EmptyContent_ReturnsBadRequest() throws Exception {
-        mockMvc.perform(post("/api/v1/forum/forum-topic")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"forumId\":\"" + UUID.randomUUID() + "\",\"title\":\"Test Topic\",\"content\":\"\"}"))
+        mockMvc.perform(post("/api/v1/forum/forum-topic/{forumId}/topics", forumId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Test Topic\",\"content\":\"\"}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void createForumTopic_ServiceError_ReturnsInternalServerError() throws Exception {
-        when(forumTopicService.createForumTopic(any(CreateForumTopicRequest.class)))
+        when(forumTopicService.createForumTopic(any(UUID.class), any(CreateForumTopicRequest.class)))
                 .thenThrow(new RuntimeException("Service error"));
 
-        mockMvc.perform(post("/api/v1/forum/forum-topic")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"forumId\":\"" + UUID.randomUUID() + "\",\"title\":\"Test Topic\",\"content\":\"Test Content\"}"))
+        mockMvc.perform(post("/api/v1/forum/forum-topic/{forumId}/topics", forumId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Test Topic\",\"content\":\"Test Content\"}"))
                 .andExpect(status().isInternalServerError());
     }
 }
