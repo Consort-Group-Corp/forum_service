@@ -24,6 +24,8 @@ repositories {
     mavenCentral()
 }
 
+extra["springCloudVersion"] = "2024.0.1"
+
 dependencyManagement {
     imports {
         mavenBom ("org.springframework.cloud:spring-cloud-dependencies:2024.0.1")
@@ -40,6 +42,9 @@ dependencies {
 
     // core-api-dto
     implementation("uz.consortgroup:core-api-dto:0.0.1")
+
+    //Eureka
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
     // MapStruct
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")

@@ -40,24 +40,26 @@ class ForumCommentControllerTest {
     @MockitoBean
     private ForumCommentService forumCommentService;
 
+    private final UUID topicId = UUID.randomUUID();
+
     @Test
     @WithMockUser
     void shouldCreateCommentSuccessfully() throws Exception {
         ForumCommentResponse response = ForumCommentResponse.builder()
                 .id(UUID.randomUUID())
-                .topicId(UUID.randomUUID())
+                .topicId(topicId)
                 .authorId(UUID.randomUUID())
                 .content("Test content")
                 .createdAt(Instant.now())
                 .build();
 
-        when(forumCommentService.createComment(UUID.randomUUID(), any(CreateForumCommentRequest.class)))
+        when(forumCommentService.createComment(any(UUID.class), any(CreateForumCommentRequest.class)))
                 .thenReturn(response);
 
         CreateForumCommentRequest request = new CreateForumCommentRequest();
         request.setContent("Test content");
 
-        mockMvc.perform(post("/api/v1/forum/forum-comment")
+        mockMvc.perform(post("/api/v1/forum/forum-comment/{topicId}/comments", topicId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf()))
@@ -72,20 +74,7 @@ class ForumCommentControllerTest {
         CreateForumCommentRequest request = new CreateForumCommentRequest();
         request.setContent("");
 
-        mockMvc.perform(post("/api/v1/forum/forum-comment")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .with(csrf()))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser
-    void shouldReturnBadRequestWhenTopicIdIsNull() throws Exception {
-        CreateForumCommentRequest request = new CreateForumCommentRequest();
-        request.setContent("Test content");
-
-        mockMvc.perform(post("/api/v1/forum/forum-comment")
+        mockMvc.perform(post("/api/v1/forum/forum-comment/{topicId}/comments", topicId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf()))
@@ -95,13 +84,13 @@ class ForumCommentControllerTest {
     @Test
     @WithMockUser
     void shouldHandleServiceException() throws Exception {
-        when(forumCommentService.createComment(UUID.randomUUID(), any(CreateForumCommentRequest.class)))
+        when(forumCommentService.createComment(any(UUID.class), any(CreateForumCommentRequest.class)))
                 .thenThrow(new RuntimeException("Service error"));
 
         CreateForumCommentRequest request = new CreateForumCommentRequest();
         request.setContent("Test content");
 
-        mockMvc.perform(post("/api/v1/forum/forum-comment")
+        mockMvc.perform(post("/api/v1/forum/forum-comment/{topicId}/comments", topicId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf()))
