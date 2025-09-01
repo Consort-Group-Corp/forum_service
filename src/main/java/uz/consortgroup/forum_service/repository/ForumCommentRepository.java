@@ -17,4 +17,10 @@ public interface ForumCommentRepository extends JpaRepository<ForumComment, UUID
         group by ft.forum.id
     """)
     List<IdCount> countCommentsByForumIds(@Param("forumIds") List<UUID> forumIds);
+
+    @Query("select count(c) from ForumComment c")
+    Long countAllComments();
+
+    @Query("select count(c) from ForumComment c where c.forum.id = :forumId")
+    Long countByForumId(@Param("forumId") UUID forumId);
 }

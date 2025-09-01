@@ -30,6 +30,7 @@ public class ForumCommentServiceImpl implements ForumCommentService {
     private final ForumCommentRepository forumCommentRepository;
     private final ForumCommentMapper forumCommentMapper;
     private final ForumAccessChecker forumAccessChecker;
+    private final ForumService forumService;
 
     @Override
     @Transactional
@@ -46,6 +47,7 @@ public class ForumCommentServiceImpl implements ForumCommentService {
 
         ForumComment comment = ForumComment.builder()
                 .forumTopic(topic)
+                .forum(topic.getForum())
                 .authorId(authorId)
                 .content(request.getContent())
                 .createdAt(Instant.now())
@@ -66,5 +68,24 @@ public class ForumCommentServiceImpl implements ForumCommentService {
         if (forumIds.isEmpty()) return Map.of();
         return forumCommentRepository.countCommentsByForumIds(forumIds).stream()
                 .collect(Collectors.toMap(IdCount::getId, IdCount::getCount));
+    }
+
+    @Override
+    public Long getTotalCommentsCount() {
+       log.info("Counting all comments");
+       return forumCommentRepository.countAllComments();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Long getCommentsCountByForumId(UUID forumId) {
+        log.info("Counting comments by forumId={}", forumId);
+
+        forumService.findForumById(forumId);
+
+        log.info("Forum found. forumId={}", forumId);
+
+        return forumCommentRepository.countByForumId(forumId);
+
     }
 }
