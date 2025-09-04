@@ -10,7 +10,7 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/consort_group
+    url: jdbc:postgresql://db:5432/consort_group
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     hikari:
@@ -29,8 +29,8 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6385
+      host: consort-redis-forum-service
+      port: 6379
 
 logging:
   level:
@@ -38,7 +38,7 @@ logging:
     org.springframework: DEBUG
 
 kafka:
-  bootstrap-servers: localhost:9092
+  bootstrap-servers: kafka:9092
   consumer-group-id: forum-group
   session-timeout-ms: 10000
   max-partition-fetch-bytes: 1048576
@@ -51,22 +51,21 @@ kafka:
 
 user:
   service:
-    url: http://localhost:8081
+    url: http://consort-user-service:8081
 
 course:
   service:
-    url: http://localhost:8084
+    url: http://consort-course-service:8084
 
 security:
   token: ${SECURITY_TOKEN}
   expiration: 3600000
-
 
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka-service:8762/eureka/
   instance:
     prefer-ip-address: true
