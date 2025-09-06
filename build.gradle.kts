@@ -52,6 +52,9 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-security")
 
+    //Actuator
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+
     //JWT
     implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
