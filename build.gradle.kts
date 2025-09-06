@@ -40,15 +40,17 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("io.github.openfeign.form:feign-form-spring:3.8.0")
 
+    // MapStruct
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+    implementation("org.mapstruct:mapstruct:1.5.3.Final")
+
     // core-api-dto
     implementation("uz.consortgroup:core-api-dto:0.0.1")
 
     //Eureka
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
-    // MapStruct
-    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
-    implementation("org.mapstruct:mapstruct:1.5.3.Final")
 
     implementation("org.springframework.boot:spring-boot-starter-security")
 
