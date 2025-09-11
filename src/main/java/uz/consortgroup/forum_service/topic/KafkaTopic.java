@@ -9,4 +9,5 @@ import org.springframework.stereotype.Component;
 public class KafkaTopic {
     @Value("${kafka.course-forum-group}")
     private String courseForumGroup;
+
 }
