@@ -40,39 +40,14 @@ spring:
           max-wait: -1ms
         shutdown-timeout: 100ms
 
-  kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:"consort-kafka:9092"}
-    consumer:
-      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:forum-group}
-      auto-offset-reset: latest
-      max-poll-records: ${SPRING_KAFKA_CONSUMER_MAX_POLL_RECORDS:500}
-      properties:
-        session.timeout.ms: ${SPRING_KAFKA_CONSUMER_SESSION_TIMEOUT_MS:10000}
-        heartbeat.interval.ms: ${SPRING_KAFKA_CONSUMER_HEARTBEAT_INTERVAL_MS:3000}
-        max.partition.fetch.bytes: ${SPRING_KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES:1048576}
-        max.poll.interval.ms: ${SPRING_KAFKA_CONSUMER_MAX_POLL_INTERVAL_MS:300000}
-
 logging:
   level:
     root: INFO
     org.springframework: DEBUG
 
-# бизнес-топики
-kafka:
-  course-group: course-group-opened-topic
-  course-forum-group: course-forum-group-created-topic
-
 user:
   service:
     url: ${USER_SERVICE_URL:http://consort-user-service:8081}
-
-course:
-  service:
-    url: ${COURSE_SERVICE_URL:http://consort-course-service:8084}
-
-security:
-  token: ${SECURITY_TOKEN}
-  expiration: ${JWT_EXPIRATION_MS:3600000}
 
 eureka:
   client:

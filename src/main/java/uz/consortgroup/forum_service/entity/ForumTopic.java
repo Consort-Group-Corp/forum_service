@@ -3,6 +3,8 @@ package uz.consortgroup.forum_service.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +21,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import uz.consortgroup.core.api.v1.dto.forum.enumeration.LanguageCode;
 
 import java.time.Instant;
 import java.util.List;
@@ -50,6 +53,16 @@ public class ForumTopic {
     @Column(name = "content", nullable = false)
     private String content;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "language_code", nullable = false, length = 8)
+    private LanguageCode languageCode;
+
+    @Column(name = "lesson_ref_type", length = 32)
+    private String lessonRefType;
+
+    @Column(name = "lesson_ref_id")
+    private UUID lessonRefId;
+
     @OneToMany(mappedBy = "forumTopic", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ForumComment> forumComments;
 
@@ -61,7 +74,7 @@ public class ForumTopic {
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = Instant.now();
+        if (createdAt == null) createdAt = Instant.now();
     }
 
     @PreUpdate

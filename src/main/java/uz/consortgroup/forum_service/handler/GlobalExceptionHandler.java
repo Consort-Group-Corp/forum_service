@@ -13,8 +13,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 import uz.consortgroup.forum_service.exception.AccessDeniedException;
+import uz.consortgroup.forum_service.exception.ForumAlreadyExistsException;
+import uz.consortgroup.forum_service.exception.ForumCommentNotFoundException;
+import uz.consortgroup.forum_service.exception.ForumComplaintNotFoundException;
 import uz.consortgroup.forum_service.exception.ForumNotFoundException;
 import uz.consortgroup.forum_service.exception.ForumTopicNotFoundException;
+import uz.consortgroup.forum_service.exception.ForumUserGroupNotFoundException;
+import uz.consortgroup.forum_service.exception.ForumValidationException;
 import uz.consortgroup.forum_service.exception.UnauthorizedException;
 
 import java.util.List;
@@ -29,6 +34,41 @@ public class GlobalExceptionHandler {
         log.error("Forum not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Forum not found", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ForumAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleForumAlreadyExistsException(ForumAlreadyExistsException ex) {
+        log.error("Forum already exists: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(HttpStatus.CONFLICT.value(), "Forum already exists", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ForumCommentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleForumCommentNotFoundException(ForumCommentNotFoundException ex) {
+        log.error("Comment not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Comment not found", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ForumComplaintNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleForumComplaintNotFoundException(ForumComplaintNotFoundException ex) {
+        log.error("Complaint not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Complaint not found", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ForumUserGroupNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleForumUserGroupNotFoundException(ForumUserGroupNotFoundException ex) {
+        log.error("User group not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "User group not found", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ForumValidationException.class)
+    public ResponseEntity<ErrorResponse> handleForumValidationException(ForumValidationException ex) {
+        log.error("Validation error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Validation error", ex.getMessage()));
     }
 
     @ExceptionHandler(ForumTopicNotFoundException.class)
@@ -59,7 +99,7 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.toList());
-        log.error("Validation error: {}", errors);
+        log.error("Validation failed: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Validation failed", String.join("; ", errors)));
     }
