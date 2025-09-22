@@ -48,12 +48,12 @@ public class ForumLike {
     private Instant updatedAt;
 
     @PrePersist
-    public void onCreate() {
-        this.createdAt = Instant.now();
+    void onCreate() {
+        if (createdAt == null) createdAt = Instant.now();
     }
 
     @PreUpdate
-    public void onUpdate() {
-        this.updatedAt = Instant.now();
+    void onUpdate() {
+        updatedAt = Instant.now();
     }
 }

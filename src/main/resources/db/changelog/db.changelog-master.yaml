@@ -4,6 +4,20 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/V028_create_forum_table.sql
   - include:
+      file: db/changelog/changeset/V029_create_forum_user_group_table.sql
+  - include:
+      file: db/changelog/changeset/V030_create_forum_user_group_memberships_table.sql
+  - include:
       file: db/changelog/changeset/V033_create_forum_topic_table.sql
   - include:
       file: db/changelog/changeset/V034_create_forum_comment_table.sql
+  - include:
+      file: db/changelog/changeset/V032_create_forum_complaint_table.sql
+  - include:
+      file: db/changelog/changeset/V043_create_forum_like_table.sql
+  - include:
+      file: db/changelog/changeset/V047_create_forum_forbidden_word_table.sql
+  - include:
+      file: db/changelog/changeset/V048_create_forum_user_block_table.sql
+  - include:
+      file: db/changelog/changeset/V049_create_forum_user_mute_table.sql

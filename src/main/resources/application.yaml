@@ -37,18 +37,6 @@ logging:
     root: INFO
     org.springframework: DEBUG
 
-kafka:
-  bootstrap-servers: localhost:9092
-  consumer-group-id: forum-group
-  session-timeout-ms: 10000
-  max-partition-fetch-bytes: 1048576
-  max-poll-records: 500
-  max-poll-interval-ms: 300000
-  course-group: course-group-opened-topic
-  course-forum-group: course-forum-group-created-topic
-  producer:
-    enable: true
-
 user:
   service:
     url: http://localhost:8081
@@ -56,11 +44,6 @@ user:
 course:
   service:
     url: http://localhost:8084
-
-security:
-  token: ${SECURITY_TOKEN}
-  expiration: 3600000
-
 
 eureka:
   client:

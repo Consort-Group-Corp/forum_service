@@ -5,9 +5,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -17,7 +20,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import uz.consortgroup.core.api.v1.dto.user.enumeration.ForumAccessType;
+import uz.consortgroup.core.api.v1.dto.forum.enumeration.ForumAccessPolicy;
 
 import java.time.Instant;
 import java.util.List;
@@ -42,21 +45,19 @@ public class Forum {
     @Column(name = "owner_id", nullable = false)
     private UUID ownerId;
 
-    @Column(name = "group_id", nullable = false, unique = true)
-    private UUID groupId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private ForumUserGroup group;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "forum_access_type", nullable = false)
-    private ForumAccessType forumAccessType;
+    @Column(name = "access_policy", nullable = false, length = 50)
+    private ForumAccessPolicy accessPolicy;
 
     @Column(name = "title", nullable = false)
     private String title;
 
     @OneToMany(mappedBy = "forum", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumTopic> forumTopics;
-
-    @OneToMany(mappedBy = "forum", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ForumComment> forumComments;
 
     @OneToMany(mappedBy = "forum", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumLike> forumLike;
@@ -72,6 +73,6 @@ public class Forum {
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = Instant.now();
+        if (createdAt == null) createdAt = Instant.now();
     }
 }

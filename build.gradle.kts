@@ -52,8 +52,6 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
 
-    implementation("org.springframework.boot:spring-boot-starter-security")
-
     //Actuator
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
@@ -65,9 +63,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-web")
+
     implementation("org.liquibase:liquibase-core")
-    compileOnly("org.projectlombok:lombok")
     runtimeOnly("org.postgresql:postgresql")
+
+    compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
     implementation("jakarta.validation:jakarta.validation-api:3.0.2")
@@ -78,7 +78,6 @@ dependencies {
 
     // Тестирование
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // Apache Kafka

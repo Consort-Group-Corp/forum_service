@@ -6,7 +6,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 @SpringBootApplication
-@EnableAspectJAutoProxy
 @EnableFeignClients(basePackages = "uz.consortgroup.forum_service.client")
 public class ForumServiceApplication {
 

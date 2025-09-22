@@ -9,7 +9,6 @@ import uz.consortgroup.forum_service.config.FeignClientConfig;
 
 import java.util.List;
 
-
 @FeignClient(
         name = "course-service",
         contextId = "courseClient",

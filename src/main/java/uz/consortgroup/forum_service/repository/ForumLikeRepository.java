@@ -7,17 +7,12 @@ import org.springframework.stereotype.Repository;
 import uz.consortgroup.forum_service.entity.ForumLike;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface ForumLikeRepository extends JpaRepository<ForumLike, UUID> {
-    @Query("""
-              select fl.forum.id as id, count(fl.id) as count
-              from ForumLike fl
-              where fl.forum.id in :forumIds
-              group by fl.forum.id
-            """)
-    List<IdCount> countLikesByForumIds(@Param("forumIds") List<UUID> forumIds);
-
     boolean existsByForum_IdAndUserId(UUID forumId, UUID userId);
+    long countByForum_Id(UUID forumId);
+    Optional<ForumLike> findByForum_IdAndUserId(UUID forumId, UUID userId);
 }
