@@ -13,6 +13,7 @@ import uz.consortgroup.core.api.v1.dto.forum.response.ForbiddenWordResponseDto;
 import uz.consortgroup.forum_service.entity.ForumForbiddenWord;
 import uz.consortgroup.forum_service.mapper.ForbiddenWordMapper;
 import uz.consortgroup.forum_service.repository.ForumForbiddenWordRepository;
+import uz.consortgroup.forum_service.security.AuthContext;
 import uz.consortgroup.forum_service.service.ForbiddenWordService;
 import uz.consortgroup.forum_service.validator.ForbiddenWordValidator;
 
@@ -30,15 +31,19 @@ public class ForbiddenWordServiceImpl implements ForbiddenWordService {
     private final ForumForbiddenWordRepository repository;
     private final ForbiddenWordMapper mapper;
     private final ForbiddenWordValidator validator;
+    private final AuthContext authContext;
 
     @Override
     @Transactional
-    public ForbiddenWordResponseDto create(ForbiddenWordCreateRequestDto dto) {
-        log.info("Creating forbidden word by user={}", dto.getCreatedBy());
+    public ForbiddenWordResponseDto createForbiddenWord(ForbiddenWordCreateRequestDto dto) {
+        UUID createdBy = authContext.getCurrentUserId();
+
+        log.info("Creating forbidden word by user={}", createdBy);
         validator.validateCreate(dto);
 
         ForumForbiddenWord entity = mapper.toEntityOnCreate(dto);
         entity.setWord(validator.normalize(entity.getWord()));
+        entity.setCreatedBy(createdBy);
         entity.setActive(true);
         entity.setCreatedAt(Instant.now());
 
@@ -50,7 +55,7 @@ public class ForbiddenWordServiceImpl implements ForbiddenWordService {
 
     @Override
     @Transactional
-    public ForbiddenWordResponseDto update(UUID id, ForbiddenWordUpdateRequestDto dto) {
+    public ForbiddenWordResponseDto updateForbiddenWord(UUID id, ForbiddenWordUpdateRequestDto dto) {
         log.info("Updating forbidden word id={}", id);
         ForumForbiddenWord target = validator.validateUpdateTarget(id);
 
@@ -68,7 +73,7 @@ public class ForbiddenWordServiceImpl implements ForbiddenWordService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ForbiddenWordResponseDto> list(Pageable pageable, Boolean active) {
+    public Page<ForbiddenWordResponseDto> getForbiddenWords(Pageable pageable, Boolean active) {
         Page<ForumForbiddenWord> page = (active == null)
                 ? repository.findAll(pageable)
                 : repository.findByActive(active, pageable);

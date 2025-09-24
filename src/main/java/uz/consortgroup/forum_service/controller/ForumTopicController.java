@@ -1,5 +1,6 @@
 package uz.consortgroup.forum_service.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/forum/forum-topic")
 @RequiredArgsConstructor
+@Tag(name = "Forum Topic", description = "Работа с темами форума")
 public class ForumTopicController {
 
     private final ForumTopicService topicService;

@@ -1,5 +1,6 @@
 package uz.consortgroup.forum_service.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,10 +19,11 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/forum/forum-comment")
 @RequiredArgsConstructor
+@Tag(name = "Forum Comment", description = "Добавление и удаление комментариев к теме")
 public class ForumCommentController {
 
     private final ForumCommentService commentService;
-    private final ModerationQueryService moderationQueryService;
+
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/topic/{topicId}")
@@ -47,11 +49,5 @@ public class ForumCommentController {
     @GetMapping("/by-topic/{topicId}")
     public Page<ForumCommentResponseDto> getTopicComments(@PathVariable UUID topicId, Pageable pageable) {
         return commentService.getTopicComments(topicId, pageable);
-    }
-
-    @GetMapping("/blocks")
-    @ResponseStatus(HttpStatus.OK)
-    public Page<UserBlockListItemResponseDto> listBlocks(@RequestParam UUID forumId, Pageable pageable) {
-        return moderationQueryService.listBlocks(forumId, pageable);
     }
 }

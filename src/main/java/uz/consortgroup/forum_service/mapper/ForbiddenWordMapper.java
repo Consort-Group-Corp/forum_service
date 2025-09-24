@@ -22,7 +22,6 @@ public interface ForbiddenWordMapper {
     ForbiddenWordResponseDto toDto(ForumForbiddenWord entity);
 
     @Mapping(target = "word", source = "word")
-    @Mapping(target = "createdBy", source = "createdBy")
     ForumForbiddenWord toEntityOnCreate(ForbiddenWordCreateRequestDto dto);
 
     @Mapping(target = "word", source = "word")
